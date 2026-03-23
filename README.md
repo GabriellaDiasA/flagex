@@ -1,6 +1,6 @@
 # Flagex
 
-Robust feature flag and feature toggle management.
+Robust runtime variable management.
 
 ## Installation
 
