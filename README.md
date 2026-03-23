@@ -5,12 +5,11 @@ Runtime variable management.
 ## Usage
 
 ### Via Endpoint
-
-  GET    /                → list all enabled variables
-  GET    /:name           → get a variable by name
-  PATCH  /:name           → update a variable's value and/or description
-  DELETE /:name           → disable a variable (soft delete)
-  PATCH  /:name/reenable  → re-enable a disabled variable
+- `GET    /                → list all enabled variables`
+- `GET    /:name           → get a variable by name`
+- `PATCH  /:name           → update a variable's value and/or description`
+- `DELETE /:name           → disable a variable (soft delete)`
+- `PATCH  /:name/reenable  → re-enable a disabled variable`
   
 ### Registering and accessing the Variables in code
 
@@ -27,7 +26,7 @@ end
 
 Access them through the Flagex public API
 ```elixir
-  Flagex.get(:my_variable)
+Flagex.get(:my_variable)
 ```
 
 ## Setup
