@@ -103,7 +103,9 @@ defmodule FlagexTest do
     test "returns {:error, :variable_disabled} for disabled variable" do
       insert_variable()
       Flagex.disable("my_var")
-      assert {:error, :variable_disabled} = Flagex.update("my_var", %{value: "new", description: "desc"})
+
+      assert {:error, :variable_disabled} =
+               Flagex.update("my_var", %{value: "new", description: "desc"})
     end
   end
 
@@ -152,6 +154,37 @@ defmodule FlagexTest do
     test "returns {:ok, :already_enabled} when already enabled" do
       insert_variable()
       assert {:ok, :already_enabled} = Flagex.reenable("my_var")
+    end
+  end
+
+  describe "run_operation changed_by" do
+    setup do
+      on_exit(fn -> Process.delete(:flagex_actor) end)
+      :ok
+    end
+
+    test "changed_by is 'client_application' when no process key and no default_actor config" do
+      insert_variable()
+      {:ok, _} = Flagex.put("my_var", "new")
+      event = Repo.get_by!(Flagex.VariableEvent, variable_name: "my_var", operation: :update)
+      assert event.changed_by == "client_application"
+    end
+
+    test "changed_by reads from process key when set" do
+      insert_variable()
+      Process.put(:flagex_actor, "alice@example.com")
+      {:ok, _} = Flagex.put("my_var", "new")
+      event = Repo.get_by!(Flagex.VariableEvent, variable_name: "my_var", operation: :update)
+      assert event.changed_by == "alice@example.com"
+    end
+
+    test "changed_by falls back to default_actor config when process key is nil" do
+      insert_variable()
+      Application.put_env(:flagex, :default_actor, "system")
+      on_exit(fn -> Application.delete_env(:flagex, :default_actor) end)
+      {:ok, _} = Flagex.put("my_var", "new")
+      event = Repo.get_by!(Flagex.VariableEvent, variable_name: "my_var", operation: :update)
+      assert event.changed_by == "system"
     end
   end
 

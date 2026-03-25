@@ -21,3 +21,9 @@ flagex-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+
+# AI
+.cursor/
+CLAUDE.md
+AGENTS.md
+docs/*/

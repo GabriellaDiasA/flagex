@@ -26,9 +26,9 @@ defmodule Flagex do
   ## Atom vs string keys
 
   Variables declared via `use Flagex.Variables` register their atoms at compile
-  time, making `Flagex.get(:atom)` safe. Variables created at runtime through
-  the management API are only accessible via string keys (`Flagex.get("name")`)
-  until a redeploy that includes their declaration.
+  time, making `Flagex.get(:atom)` safe. String keys (`Flagex.get("name")`) also
+  work and are equivalent — the atom form is simply more idiomatic when the atom
+  is already known at the call site.
   """
 
   alias Flagex.{Variable, VariableEvent}
@@ -78,6 +78,11 @@ defmodule Flagex do
     import Ecto.Query, only: [from: 2]
     repo().all(from(v in Variable, where: v.enabled == true))
   end
+
+  @doc "Returns `{:ok, variable}` or `{:error, :not_found}` for any variable by name, regardless of enabled status."
+  @spec find(name()) :: {:ok, Variable.t()} | {:error, :not_found}
+  def find(name) when is_atom(name), do: find(Atom.to_string(name))
+  def find(name) when is_binary(name), do: fetch_variable(name)
 
   # ---------------------------------------------------------------------------
   # Writes — persist to DB, propagate via NOTIFY
@@ -177,6 +182,9 @@ defmodule Flagex do
         variable_name: updated.name,
         operation: operation,
         value: updated.value,
+        changed_by:
+          Process.get(:flagex_actor) ||
+            Application.get_env(:flagex, :default_actor, "client_application"),
         changed_at: now
       })
     end)

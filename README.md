@@ -33,26 +33,37 @@ Flagex.get(:my_variable)
 
 ### Dependency
 
-If [available in Hex](https://hex.pm/docs/publish) (not yet!), the package can be installed
-by adding `flagex` to your list of dependencies in `mix.exs`:
+Add `flagex` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:flagex, "~> 0.1.0"}
+    {:flagex, github: "GabriellaDiasA/flagex"}
   ]
 end
 ```
 
 ### Configuration
 
-Add the following to your `config.exs`
+Add the following to your `config.exs`:
 ```elixir
+# Required
 config :flagex,
   repo: MyApp.Repo,
   otp_app: :my_app,
-  variables_module: MyApp.Variables,
-  cache: true
+  variables_module: MyApp.Variables
+
+# Optional: enable distributed cache (requires nebulex deps)
+config :flagex, cache: true
+
+# Optional: identity written to audit log when no actor is extracted from the request
+config :flagex, default_actor: "my_app"
+
+# Optional: extract actor identity from requests for the audit log
+# Using internal JWT decoding:
+config :flagex, actor_extraction: [header: "authorization", claim: "sub"]
+# Or using a custom callback:
+config :flagex, actor_extraction: {MyApp.Auth, :extract_actor, []}
 ```
 
 ### Routing
@@ -75,10 +86,10 @@ defmodule MyApp.Repo.Migrations.AddFlagex do
 end
 ```
 
-The `flagex` application will wait for migrations to be up before synchronizing variables
+The `flagex` application will wait for migrations to be up before synchronizing variables.
 
-### Thanks!
+Alternatively, use the provided Mix task:
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/flagex>.
+```bash
+mix flagex.migrate
+```

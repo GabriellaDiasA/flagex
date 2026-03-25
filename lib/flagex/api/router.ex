@@ -6,8 +6,10 @@ defmodule Flagex.Router do
 
       forward "/flagex", Flagex.Router
 
-  All routes return JSON. Authentication and authorization are handled by
-  the client application's pipeline before forwarding to this router.
+  All routes return JSON. Actor identity extraction can be configured directly
+  via `:actor_extraction` — see `Flagex.Plug.ExtractActor`. Other authentication
+  and authorization concerns are handled by the client application's pipeline
+  before forwarding to this router.
 
   ## Endpoints
 
@@ -23,16 +25,17 @@ defmodule Flagex.Router do
 
   alias Flagex.API.Controller
 
-  plug :match
-  plug Plug.Parsers, parsers: [:json], json_decoder: Jason
-  plug :dispatch
+  plug(:match)
+  plug(Plug.Parsers, parsers: [:json], json_decoder: Jason)
+  plug(Flagex.Plug.ExtractActor)
+  plug(:dispatch)
 
-  get "/", do: Controller.index(conn, conn.params)
+  get("/", do: Controller.index(conn, conn.params))
 
-  get "/:name", do: Controller.show(conn, conn.params)
-  patch "/:name/reenable", do: Controller.reenable(conn, conn.params)
-  patch "/:name", do: Controller.update(conn, conn.params)
-  delete "/:name", do: Controller.disable(conn, conn.params)
+  get("/:name", do: Controller.show(conn, conn.params))
+  patch("/:name/reenable", do: Controller.reenable(conn, conn.params))
+  patch("/:name", do: Controller.update(conn, conn.params))
+  delete("/:name", do: Controller.disable(conn, conn.params))
 
   match _ do
     conn

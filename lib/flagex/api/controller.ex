@@ -10,19 +10,18 @@ defmodule Flagex.API.Controller do
   # ---------------------------------------------------------------------------
 
   def index(conn, _params) do
-    import Ecto.Query, only: [from: 2]
-    variables = repo().all(from(v in Variable, where: v.enabled == true))
-    json(conn, 200, Enum.map(variables, &serialize/1))
+    json(conn, 200, Enum.map(Flagex.all(), &serialize/1))
   end
 
   def show(conn, %{"name" => name}) do
-    case repo().get_by(Variable, name: name) do
-      nil -> json(conn, 404, %{error: "variable not found"})
-      variable -> json(conn, 200, serialize(variable))
+    case Flagex.find(name) do
+      {:error, :not_found} -> json(conn, 404, %{error: "variable not found"})
+      {:ok, variable} -> json(conn, 200, serialize(variable))
     end
   end
 
   def update(conn, %{"name" => name} = params) do
+    Process.put(:flagex_actor, conn.private[:flagex_actor])
     attrs = Map.take(params, ["value", "description"])
 
     case Flagex.update(name, attrs) do
@@ -34,6 +33,8 @@ defmodule Flagex.API.Controller do
   end
 
   def disable(conn, %{"name" => name}) do
+    Process.put(:flagex_actor, conn.private[:flagex_actor])
+
     case Flagex.disable(name) do
       {:ok, :already_disabled} -> json(conn, 200, %{message: "variable is already disabled"})
       {:ok, variable} -> json(conn, 200, serialize(variable))
@@ -43,6 +44,8 @@ defmodule Flagex.API.Controller do
   end
 
   def reenable(conn, %{"name" => name}) do
+    Process.put(:flagex_actor, conn.private[:flagex_actor])
+
     case Flagex.reenable(name) do
       {:ok, :already_enabled} -> json(conn, 200, %{message: "variable is already enabled"})
       {:ok, variable} -> json(conn, 200, serialize(variable))
@@ -80,6 +83,4 @@ defmodule Flagex.API.Controller do
     |> put_resp_content_type("application/json")
     |> send_resp(status, Jason.encode!(body))
   end
-
-  defp repo, do: Flagex.Application.config!(:repo)
 end

@@ -8,7 +8,8 @@ defmodule Flagex.MixProject do
       elixir: "~> 1.18",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
-      description: "Runtime configuration variables for Phoenix applications, backed by PostgreSQL.",
+      description:
+        "Runtime configuration variables for Phoenix applications, backed by PostgreSQL.",
       source_url: "https://github.com/GabriellaDiasA/flagex",
       deps: deps(),
       aliases: aliases(),
