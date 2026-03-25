@@ -146,6 +146,54 @@ defmodule Flagex.API.RouterTest do
     end
   end
 
+  describe "changed_by via controller bridge" do
+    setup do
+      on_exit(fn -> Process.delete(:flagex_actor) end)
+      :ok
+    end
+
+    test "PATCH /:name records changed_by from conn.private" do
+      insert_variable()
+
+      conn =
+        conn(:patch, "/my_var", Jason.encode!(%{value: "off"}))
+        |> put_req_header("content-type", "application/json")
+        |> Plug.Conn.put_private(:flagex_actor, "test_user")
+
+      Flagex.Router.call(conn, @opts)
+
+      event = Repo.get_by!(Flagex.VariableEvent, variable_name: "my_var", operation: :update)
+      assert event.changed_by == "test_user"
+    end
+
+    test "DELETE /:name records changed_by from conn.private" do
+      insert_variable()
+
+      conn =
+        conn(:delete, "/my_var")
+        |> Plug.Conn.put_private(:flagex_actor, "test_user")
+
+      Flagex.Router.call(conn, @opts)
+
+      event = Repo.get_by!(Flagex.VariableEvent, variable_name: "my_var", operation: :disable)
+      assert event.changed_by == "test_user"
+    end
+
+    test "PATCH /:name/reenable records changed_by from conn.private" do
+      insert_variable()
+      Flagex.disable("my_var")
+
+      conn =
+        conn(:patch, "/my_var/reenable")
+        |> Plug.Conn.put_private(:flagex_actor, "test_user")
+
+      Flagex.Router.call(conn, @opts)
+
+      event = Repo.get_by!(Flagex.VariableEvent, variable_name: "my_var", operation: :reenable)
+      assert event.changed_by == "test_user"
+    end
+  end
+
   describe "unknown routes" do
     test "returns 404 for unmatched path" do
       conn = call(:get, "/a/b/c")
