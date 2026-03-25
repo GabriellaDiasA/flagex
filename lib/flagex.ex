@@ -79,6 +79,11 @@ defmodule Flagex do
     repo().all(from(v in Variable, where: v.enabled == true))
   end
 
+  @doc "Returns `{:ok, variable}` or `{:error, :not_found}` for any variable by name, regardless of enabled status."
+  @spec find(name()) :: {:ok, Variable.t()} | {:error, :not_found}
+  def find(name) when is_atom(name), do: find(Atom.to_string(name))
+  def find(name) when is_binary(name), do: fetch_variable(name)
+
   # ---------------------------------------------------------------------------
   # Writes — persist to DB, propagate via NOTIFY
   # ---------------------------------------------------------------------------

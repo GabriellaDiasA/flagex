@@ -10,15 +10,13 @@ defmodule Flagex.API.Controller do
   # ---------------------------------------------------------------------------
 
   def index(conn, _params) do
-    import Ecto.Query, only: [from: 2]
-    variables = repo().all(from(v in Variable, where: v.enabled == true))
-    json(conn, 200, Enum.map(variables, &serialize/1))
+    json(conn, 200, Enum.map(Flagex.all(), &serialize/1))
   end
 
   def show(conn, %{"name" => name}) do
-    case repo().get_by(Variable, name: name) do
-      nil -> json(conn, 404, %{error: "variable not found"})
-      variable -> json(conn, 200, serialize(variable))
+    case Flagex.find(name) do
+      {:error, :not_found} -> json(conn, 404, %{error: "variable not found"})
+      {:ok, variable} -> json(conn, 200, serialize(variable))
     end
   end
 
@@ -84,5 +82,4 @@ defmodule Flagex.API.Controller do
     |> send_resp(status, Jason.encode!(body))
   end
 
-  defp repo, do: Flagex.Application.config!(:repo)
 end
