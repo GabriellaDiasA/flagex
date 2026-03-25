@@ -18,7 +18,11 @@ defmodule Flagex.VariableEvent do
 
   schema "flagex_variable_events" do
     field(:variable_name, :string)
-    field(:operation, Ecto.Enum, values: [create: "CREATE", update: "UPDATE", disable: "DISABLE", reenable: "REENABLE"])
+
+    field(:operation, Ecto.Enum,
+      values: [create: "CREATE", update: "UPDATE", disable: "DISABLE", reenable: "REENABLE"]
+    )
+
     field(:value, :string)
     field(:changed_by, :string)
     field(:changed_at, :utc_datetime_usec)

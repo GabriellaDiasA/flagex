@@ -25,17 +25,17 @@ defmodule Flagex.Router do
 
   alias Flagex.API.Controller
 
-  plug :match
-  plug Plug.Parsers, parsers: [:json], json_decoder: Jason
-  plug Flagex.Plug.ExtractActor
-  plug :dispatch
+  plug(:match)
+  plug(Plug.Parsers, parsers: [:json], json_decoder: Jason)
+  plug(Flagex.Plug.ExtractActor)
+  plug(:dispatch)
 
-  get "/", do: Controller.index(conn, conn.params)
+  get("/", do: Controller.index(conn, conn.params))
 
-  get "/:name", do: Controller.show(conn, conn.params)
-  patch "/:name/reenable", do: Controller.reenable(conn, conn.params)
-  patch "/:name", do: Controller.update(conn, conn.params)
-  delete "/:name", do: Controller.disable(conn, conn.params)
+  get("/:name", do: Controller.show(conn, conn.params))
+  patch("/:name/reenable", do: Controller.reenable(conn, conn.params))
+  patch("/:name", do: Controller.update(conn, conn.params))
+  delete("/:name", do: Controller.disable(conn, conn.params))
 
   match _ do
     conn

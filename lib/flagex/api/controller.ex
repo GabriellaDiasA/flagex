@@ -34,6 +34,7 @@ defmodule Flagex.API.Controller do
 
   def disable(conn, %{"name" => name}) do
     Process.put(:flagex_actor, conn.private[:flagex_actor])
+
     case Flagex.disable(name) do
       {:ok, :already_disabled} -> json(conn, 200, %{message: "variable is already disabled"})
       {:ok, variable} -> json(conn, 200, serialize(variable))
@@ -44,6 +45,7 @@ defmodule Flagex.API.Controller do
 
   def reenable(conn, %{"name" => name}) do
     Process.put(:flagex_actor, conn.private[:flagex_actor])
+
     case Flagex.reenable(name) do
       {:ok, :already_enabled} -> json(conn, 200, %{message: "variable is already enabled"})
       {:ok, variable} -> json(conn, 200, serialize(variable))
@@ -81,5 +83,4 @@ defmodule Flagex.API.Controller do
     |> put_resp_content_type("application/json")
     |> send_resp(status, Jason.encode!(body))
   end
-
 end

@@ -9,7 +9,9 @@ defmodule Flagex.VariableTest do
     end
 
     test "valid with all fields" do
-      changeset = Variable.changeset(%Variable{}, %{name: "my_var", value: "on", description: "desc"})
+      changeset =
+        Variable.changeset(%Variable{}, %{name: "my_var", value: "on", description: "desc"})
+
       assert changeset.valid?
     end
 

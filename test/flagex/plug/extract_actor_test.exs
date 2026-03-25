@@ -27,7 +27,10 @@ defmodule Flagex.Plug.ExtractActorTest do
 
     test "extracts claim from valid JWT and stores in conn.private" do
       token = make_jwt(%{"sub" => "alice@example.com"})
-      result = conn(:patch, "/my_var") |> put_req_header("authorization", "Bearer #{token}") |> call()
+
+      result =
+        conn(:patch, "/my_var") |> put_req_header("authorization", "Bearer #{token}") |> call()
+
       assert result.halted == false
       assert result.private[:flagex_actor] == "alice@example.com"
     end
@@ -64,6 +67,7 @@ defmodule Flagex.Plug.ExtractActorTest do
 
     test "halts with 401 when payload is not valid JSON" do
       bad_payload = Base.url_encode64("not json", padding: false)
+
       result =
         conn(:patch, "/my_var")
         |> put_req_header("authorization", "header.#{bad_payload}.sig")
@@ -75,7 +79,10 @@ defmodule Flagex.Plug.ExtractActorTest do
 
     test "halts with 401 when configured claim is absent from payload" do
       token = make_jwt(%{"email" => "alice@example.com"})
-      result = conn(:patch, "/my_var") |> put_req_header("authorization", "Bearer #{token}") |> call()
+
+      result =
+        conn(:patch, "/my_var") |> put_req_header("authorization", "Bearer #{token}") |> call()
+
       assert result.halted == true
       assert result.status == 401
     end

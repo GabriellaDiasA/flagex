@@ -103,7 +103,9 @@ defmodule FlagexTest do
     test "returns {:error, :variable_disabled} for disabled variable" do
       insert_variable()
       Flagex.disable("my_var")
-      assert {:error, :variable_disabled} = Flagex.update("my_var", %{value: "new", description: "desc"})
+
+      assert {:error, :variable_disabled} =
+               Flagex.update("my_var", %{value: "new", description: "desc"})
     end
   end
 
