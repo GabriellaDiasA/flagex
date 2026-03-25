@@ -55,9 +55,12 @@ defmodule Flagex.Migrations do
       add(:changed_at, :utc_datetime_usec, null: false)
     end
 
-    execute(
-      "ALTER TABLE flagex_variable_events ADD CONSTRAINT flagex_variable_events_operation_check CHECK (operation IN ('CREATE', 'UPDATE', 'DISABLE', 'REENABLE'));",
-      "ALTER TABLE flagex_variable_events DROP CONSTRAINT flagex_variable_events_operation_check;"
+    drop_if_exists(constraint("flagex_variable_events", "operation_check"))
+
+    create(
+      constraint("flagex_variable_events", "operation_check",
+        check: "operation IN ('CREATE', 'UPDATE', 'DISABLE', 'REENABLE')"
+      )
     )
 
     create_if_not_exists(index(:flagex_variable_events, [:variable_name]))
@@ -85,6 +88,8 @@ defmodule Flagex.Migrations do
       "DROP FUNCTION IF EXISTS flagex_notify();"
     )
 
+    execute("DROP TRIGGER IF EXISTS flagex_variable_changed ON flagex_variables;")
+
     execute(
       """
       CREATE TRIGGER flagex_variable_changed
@@ -101,6 +106,8 @@ defmodule Flagex.Migrations do
   def down do
     execute("DROP TRIGGER IF EXISTS flagex_variable_changed ON flagex_variables;")
     execute("DROP FUNCTION IF EXISTS flagex_notify();")
+
+    drop_if_exists(constraint("flagex_variable_events", "operation_check"))
 
     drop_if_exists(index(:flagex_variable_events, [:operation]))
     drop_if_exists(index(:flagex_variable_events, [:changed_at]))
