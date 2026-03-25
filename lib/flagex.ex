@@ -177,6 +177,7 @@ defmodule Flagex do
         variable_name: updated.name,
         operation: operation,
         value: updated.value,
+        changed_by: Process.get(:flagex_actor) || Application.get_env(:flagex, :default_actor, "client_application"),
         changed_at: now
       })
     end)
