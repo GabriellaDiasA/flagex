@@ -88,6 +88,31 @@ defmodule Flagex.Plug.ExtractActorTest do
     end
   end
 
+  describe "callback path" do
+    setup do
+      on_exit(fn -> Application.delete_env(:flagex, :actor_extraction) end)
+      :ok
+    end
+
+    test "stores actor when callback returns {:ok, actor}" do
+      Application.put_env(:flagex, :actor_extraction, {__MODULE__, :ok_callback, []})
+      result = conn(:patch, "/my_var") |> call()
+      assert result.halted == false
+      assert result.private[:flagex_actor] == "callback_user"
+    end
+
+    test "halts with 401 when callback returns {:error, reason}" do
+      Application.put_env(:flagex, :actor_extraction, {__MODULE__, :error_callback, []})
+      result = conn(:patch, "/my_var") |> call()
+      assert result.halted == true
+      assert result.status == 401
+    end
+
+    # Callback stubs used above
+    def ok_callback(_conn), do: {:ok, "callback_user"}
+    def error_callback(_conn), do: {:error, :unauthorized}
+  end
+
   describe "no-op when actor_extraction not configured" do
     setup do
       Application.delete_env(:flagex, :actor_extraction)

@@ -46,9 +46,11 @@ defmodule Flagex.Plug.ExtractActor do
     end
   end
 
-  defp extract_from_callback(conn, _mod, _fun, _args) do
-    # Implemented in Task 5
-    conn
+  defp extract_from_callback(conn, mod, fun, args) do
+    case apply(mod, fun, [conn | args]) do
+      {:ok, actor} -> put_private(conn, :flagex_actor, actor)
+      {:error, _} -> halt_unauthorized(conn)
+    end
   end
 
   defp halt_unauthorized(conn) do
