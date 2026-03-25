@@ -6,8 +6,10 @@ defmodule Flagex.Router do
 
       forward "/flagex", Flagex.Router
 
-  All routes return JSON. Authentication and authorization are handled by
-  the client application's pipeline before forwarding to this router.
+  All routes return JSON. Actor identity extraction can be configured directly
+  via `:actor_extraction` — see `Flagex.Plug.ExtractActor`. Other authentication
+  and authorization concerns are handled by the client application's pipeline
+  before forwarding to this router.
 
   ## Endpoints
 

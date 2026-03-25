@@ -1,5 +1,5 @@
 defmodule Flagex.Plug.ExtractActorTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   import Plug.Test
   import Plug.Conn

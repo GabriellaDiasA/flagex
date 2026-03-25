@@ -36,7 +36,7 @@ defmodule Flagex.Plug.ExtractActor do
 
     with [raw] <- get_req_header(conn, header),
          token = String.replace_prefix(raw, "Bearer ", ""),
-         [_header_seg, payload_seg, _sig] <- String.split(token, "."),
+         [_header_seg, payload_seg, _sig] <- String.split(token, ".", parts: 3),
          {:ok, decoded} <- Base.url_decode64(payload_seg, padding: false),
          {:ok, claims} <- Jason.decode(decoded),
          actor when not is_nil(actor) <- Map.get(claims, claim) do
