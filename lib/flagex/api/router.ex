@@ -25,6 +25,7 @@ defmodule Flagex.Router do
 
   plug :match
   plug Plug.Parsers, parsers: [:json], json_decoder: Jason
+  plug Flagex.Plug.ExtractActor
   plug :dispatch
 
   get "/", do: Controller.index(conn, conn.params)
